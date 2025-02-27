@@ -48,6 +48,7 @@ import (
 	"github.com/hashicorp/terraform-provider-aws/internal/conns"
 	"github.com/hashicorp/terraform-provider-aws/internal/create"
 	"github.com/hashicorp/terraform-provider-aws/internal/errs"
+	"github.com/hashicorp/terraform-provider-aws/internal/flex"
 	tftags "github.com/hashicorp/terraform-provider-aws/internal/tags"
 	"github.com/hashicorp/terraform-provider-aws/internal/tfresource"
 	"github.com/hashicorp/terraform-provider-aws/internal/verify"
@@ -1228,4 +1229,152 @@ func expandComplexArguments(tfList []interface{}) []*mediapackage.ComplexArgumen
 	}
 
 	return s
+}
+
+func expandDashPackage(tfMap map[string]interface{}) *types.DashPackage {
+	obj := &types.DashPackage{
+		AdTriggers: expandAdTriggersElement(tfMap["ad_triggers"].([]interface{})),
+		AdsOnDeliveryRestrictions: types.AdsOnDeliveryRestrictions(tfMap["ads_on_delivery_restrictions"].(string)),
+		ManifestLayout: 		 types.ManifestLayout(tfMap["manifest_layout"].(string)),
+	}
+
+	if v, ok := tfMap["ads_on_delivery_restrictions"]; ok {
+		obj.AdsOnDeliveryRestrictions = types.AdsOnDeliveryRestrictions(v.(string))
+	}
+
+	if v, ok := tfMap["encryption"]; ok {
+		obj.Encryption = expandDashEncryption(v.(map[string]interface{}))
+	}
+
+	if v, ok := tfMap["include_iframe_only_stream"]; ok {
+		obj.IncludeIframeOnlyStream = aws.Bool(v.(bool))
+	}
+
+	if v, ok := tfMap["manifest_window_seconds"]; ok {
+		obj.ManifestWindowSeconds = aws.Int32(v.(int32))
+	}
+
+	if v, ok := tfMap["min_buffer_time_seconds"]; ok {
+		obj.MinBufferTimeSeconds = aws.Int32(v.(int32))
+	}
+
+	if v, ok := tfMap["min_update_period_seconds"]; ok {
+		obj.MinUpdatePeriodSeconds = aws.Int32(v.(int32))
+	}
+
+	if v, ok := tfMap["period_triggers"]; ok {
+		obj.PeriodTriggers = expandPeriodTriggersElement(v.([]interface{}))
+	}
+
+	if v, ok := tfMap["profile"]; ok {
+		obj.Profile = types.Profile(v.(string))
+	}
+
+	if v, ok := tfMap["segment_duration_seconds"]; ok {
+		obj.SegmentDurationSeconds = aws.Int32(v.(int32))
+	}
+
+	if v, ok := tfMap["segment_template_format"]; ok {
+		obj.SegmentTemplateFormat = types.SegmentTemplateFormat(v.(string))
+	}
+
+	if v, ok := tfMap["stream_selection"]; ok {
+		obj.StreamSelection = expandStreamSelection(v.(map[string]interface{}))
+	}
+
+	if v, ok := tfMap["suggested_presentation_delay_seconds"]; ok {
+		obj.SuggestedPresentationDelaySeconds = aws.Int32(v.(int32))
+	}
+
+	if v, ok := tfMap["utc_timing"]; ok {
+		obj.UtcTiming = types.UtcTiming(v.(string))
+	}
+
+	if v, ok := tfMap["utc_timing_uri"]; ok {
+		obj.UtcTimingUri = aws.String(v.(string))
+	}
+
+	return obj
+}
+
+func expandAdTriggersElement(tfList []interface{}) []types.AdTriggersElement {
+	if len(tfList) == 0 {
+		return nil
+	}
+
+	var es []types.AdTriggersElement
+	for _, r := range tfList {
+		es = append(es, r.(types.AdTriggersElement))
+	}
+
+	return es
+}
+
+func expandDashEncryption(tfMap map[string]interface{}) *types.DashEncryption {
+	obj := &types.DashEncryption{
+		SpekeKeyProvider: expandSpekeKeyProvider(tfMap["speke_key_provider"].(map[string]interface{})),
+	}
+
+	if v, ok := tfMap["key_rotation_interval_seconds"]; ok {
+		obj.KeyRotationIntervalSeconds = aws.Int32(v.(int32))
+	}
+
+	return obj
+}
+
+func expandSpekeKeyProvider(tfMap map[string]interface{}) *types.SpekeKeyProvider {
+	obj := &types.SpekeKeyProvider{
+		ResourceId: aws.String(tfMap["resource_id"].(string)),
+		RoleArn:    aws.String(tfMap["role_arn"].(string)),
+		SystemIds: flex.ExpandStringValueList(tfMap["system_ids"].([]interface{})),
+		Url: 	  aws.String(tfMap["url"].(string)),
+	}
+
+	if v, ok := tfMap["certificate_arn"]; ok {
+		obj.CertificateArn = aws.String(v.(string))
+	}
+
+	if v, ok := tfMap["encryption_contract_configuration"]; ok {
+		obj.EncryptionContractConfiguration = expandEncryptionContractConfiguration(v.(map[string]interface{}))
+	}
+
+	return obj
+}
+
+func expandEncryptionContractConfiguration(tfMap map[string]interface{}) *types.EncryptionContractConfiguration {
+	return &types.EncryptionContractConfiguration{
+		PresetSpeke20Audio: types.PresetSpeke20Audio(tfMap["preset_speke20_audio"].(string)),
+		PresetSpeke20Video: types.PresetSpeke20Video(tfMap["preset_speke20_video"].(string)),
+	}
+}
+
+func expandPeriodTriggersElement(tfList []interface{}) []types.PeriodTriggersElement {
+	if len(tfList) == 0 {
+		return nil
+	}
+
+	var es []types.PeriodTriggersElement
+	for _, r := range tfList {
+		es = append(es, r.(types.PeriodTriggersElement))
+	}
+
+	return es
+}
+
+func expandStreamSelection(tfMap map[string]interface{}) *types.StreamSelection {
+	obj := &types.StreamSelection{}
+
+	if v, ok := tfMap["max_video_bits_per_second"]; ok {
+		obj.MaxVideoBitsPerSecond = aws.Int32(v.(int32))
+	}
+
+	if v, ok := tfMap["min_video_bits_per_second"]; ok {
+		obj.MinVideoBitsPerSecond = aws.Int32(v.(int32))
+	}
+
+	if v, ok := tfMap["stream_order"]; ok {
+		obj.StreamOrder = types.StreamOrder(v.(string))
+	}
+
+	return obj
 }
