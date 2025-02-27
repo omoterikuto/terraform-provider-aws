@@ -1232,10 +1232,10 @@ func expandComplexArguments(tfList []interface{}) []*mediapackage.ComplexArgumen
 }
 
 func expandDashPackage(tfMap map[string]interface{}) *types.DashPackage {
-	obj := &types.DashPackage{
-		AdTriggers: expandAdTriggersElement(tfMap["ad_triggers"].([]interface{})),
-		AdsOnDeliveryRestrictions: types.AdsOnDeliveryRestrictions(tfMap["ads_on_delivery_restrictions"].(string)),
-		ManifestLayout: 		 types.ManifestLayout(tfMap["manifest_layout"].(string)),
+	obj := &types.DashPackage{ }
+	
+	if v, ok := tfMap["ad_triggers"]; ok {
+		obj.AdTriggers = expandAdTriggersElement(v.([]interface{}))
 	}
 
 	if v, ok := tfMap["ads_on_delivery_restrictions"]; ok {
@@ -1248,6 +1248,10 @@ func expandDashPackage(tfMap map[string]interface{}) *types.DashPackage {
 
 	if v, ok := tfMap["include_iframe_only_stream"]; ok {
 		obj.IncludeIframeOnlyStream = aws.Bool(v.(bool))
+	}
+
+	if v, ok := tfMap["manifest_layout"]; ok {
+		obj.ManifestLayout = types.ManifestLayout(v.(string))
 	}
 
 	if v, ok := tfMap["manifest_window_seconds"]; ok {
